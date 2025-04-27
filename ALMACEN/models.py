@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import F
 from django.core.exceptions import ValidationError
-from TRABAJOS.models import Trabajo
+from TRABAJOS.models import OrdenServicio
 
 class Unidad_Medida(models.Model):
     nombre = models.CharField(max_length=50)
@@ -176,7 +176,7 @@ class ArticuloEnOrden(models.Model):
         self.orden.actualizar_estado()
 
 class BienesAsignados(models.Model):
-    trabajo = models.ForeignKey(Trabajo, on_delete=models.CASCADE, related_name='bienes_usados')
+    trabajo = models.ForeignKey(OrdenServicio, on_delete=models.CASCADE, related_name='bienes_usados')
     bien = models.ForeignKey(Bienes, on_delete=models.PROTECT)
     cantidad_usada = models.PositiveIntegerField()
     unidades_asignadas = models.ManyToManyField(UnidadBien, blank=True)
@@ -209,7 +209,7 @@ class Proveedor(models.Model):
 
 class MaterialAsignado(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    trabajo = models.ForeignKey(Trabajo, on_delete=models.CASCADE)
+    trabajo = models.ForeignKey(OrdenServicio, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):
@@ -231,7 +231,7 @@ class Sobrante(models.Model):
     material_asignado = models.ForeignKey(MaterialAsignado, on_delete=models.SET_NULL, related_name="sobrantes", null=True, blank=True)
     nombre = models.CharField(max_length=255)
     cantidad = models.PositiveIntegerField()
-    trabajo_origen = models.ForeignKey(Trabajo, on_delete=models.CASCADE)
+    trabajo_origen = models.ForeignKey(OrdenServicio, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if self.material_asignado:
@@ -261,7 +261,7 @@ class Sobrante(models.Model):
         return f"{self.nombre} - {self.cantidad} unidades"
 
 class SobranteAsignado(models.Model):
-    trabajo = models.ForeignKey(Trabajo, on_delete=models.CASCADE, related_name='sobrantes_usados')
+    trabajo = models.ForeignKey(OrdenServicio, on_delete=models.CASCADE, related_name='sobrantes_usados')
     nombre = models.CharField(max_length=255)
     sobrante = models.ForeignKey(Sobrante, on_delete=models.SET_NULL, null=True, blank=True)
     cantidad_usada = models.PositiveIntegerField()
@@ -287,7 +287,7 @@ class SobranteAsignado(models.Model):
         return f"{self.cantidad_usada} de {self.nombre} en {self.trabajo}"
 
 class MaterialUtilizado(models.Model):
-    trabajo = models.ForeignKey(Trabajo, on_delete=models.CASCADE, related_name="materiales_utilizados")
+    trabajo = models.ForeignKey(OrdenServicio, on_delete=models.CASCADE, related_name="materiales_utilizados")
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField()
 

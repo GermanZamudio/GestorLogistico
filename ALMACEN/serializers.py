@@ -7,7 +7,7 @@ from .models import (
     Categoria, Unidad_Medida
 )
 
-from TRABAJOS.models import Trabajo
+from TRABAJOS.models import OrdenServicio as Trabajo
 
 class ArticuloSerializer(serializers.ModelSerializer):
     class Meta:

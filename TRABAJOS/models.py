@@ -1,27 +1,49 @@
 from django.db import models
 from django.db.models import F
 
-class Edificio(models.Model):  # O Ubicacion si prefieres un término más amplio
-    nombre = models.CharField(max_length=255, unique=True)
+class TipoContenedorDispositivo(models.Model):
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+    
+class TipoEstado(models.Model):
+    nombre = models.CharField(max_length=50)  # Ej: "Dispositivo", "Orden de Servicio"
 
     def __str__(self):
         return self.nombre
 
 
-class Departamento(models.Model):
-    edificio = models.ForeignKey(Edificio, on_delete=models.CASCADE, related_name="departamentos")
-    nombre = models.CharField(max_length=255)
+class Estado(models.Model):
+    nombre = models.CharField(max_length=100)
+    tipo = models.ForeignKey(TipoEstado, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.edificio.nombre} - {self.nombre}"
+        return f"{self.nombre} ({self.tipo})"
+
+class ContenedorDispositivos(models.Model):
+    nombre = models.CharField(max_length=150)
+    tipo = models.ForeignKey(TipoContenedorDispositivo, on_delete=models.PROTECT)
+    codigo= models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.nombre} ({self.tipo})"
+
+
+class Dispositivo(models.Model):
+    contenedor = models.ForeignKey(ContenedorDispositivos, on_delete=models.CASCADE, related_name='dispositivos')
+    nombre = models.CharField(max_length=150)
+    descripcion = models.TextField(blank=True, null=True)
+    codigo= models.CharField(max_length=100)
+    estado=models.ForeignKey(Estado,on_delete=models.CASCADE, related_name='estado_dispositivo')
+    def __str__(self):
+        return self.nombre
     
-class Trabajo(models.Model):
-    departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE, related_name="trabajos")
+class OrdenServicio(models.Model):
+    dispositivo = models.ForeignKey(Dispositivo, on_delete=models.CASCADE, related_name="trabajos")
     descripcion = models.TextField()
     oficial_encargado = models.CharField(max_length=100, blank=True, null=True)
-    suboficial_encargado = models.CharField(max_length=100, blank=True, null=True)
-    planeamiento = models.TextField(blank=True, null=True)
-    estado = models.CharField(max_length=50, default='Activo')
+    estado=models.ForeignKey(Estado,on_delete=models.CASCADE, related_name='estado_orden')
 
     def cerrar_trabajo(self):
         """Mueve materiales asignados a MaterialUtilizado y cierra el trabajo sin modificar sobrantes."""
